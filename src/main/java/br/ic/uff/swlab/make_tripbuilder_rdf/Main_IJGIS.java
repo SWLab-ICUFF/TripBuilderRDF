@@ -6,16 +6,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -29,9 +26,9 @@ public class Main_IJGIS {
 
     public static void main(String[] args) throws IOException {
 
-        String[] directories = {"./src/main/resources/TripBuilderDataset/florence",
-            "./src/main/resources/TripBuilderDataset/rome",
-            "./src/main/resources/TripBuilderDataset/pisa"
+        String[] directories = {"./src/main/resources/TripBuilderRawData/florence",
+            "./src/main/resources/TripBuilderRawData/rome",
+            "./src/main/resources/TripBuilderRawData/pisa"
         };
         Map<String, POI> pois = new HashMap<>();
         Map<String, Photo> photos = new HashMap<>();
@@ -82,13 +79,12 @@ public class Main_IJGIS {
                     p.addProperty(model.createProperty(vocabNS + "latitude"), model.createTypedLiteral(poi.latitude));
                     p.addProperty(RDFS.label, poi.name);
                     p.addProperty(model.createProperty(vocabNS + "longitude"), model.createTypedLiteral(poi.longitude));
-                    p.addProperty(model.createProperty(vocabNS+"locatedIn"), t.location);
+                    p.addProperty(model.createProperty(vocabNS + "locatedIn"), t.location);
 
-                    for (String category : s.cluster.categories) {
+                    for (String category : s.cluster.categories)
                         p.addProperty(model.createProperty(vocabNS + "category"), category);
-                    }
                     model.add(p, RDF.type, model.createResource(vocabNS + "POI", RDFS.Class));
-                    
+
                     stop.addProperty(model.createProperty(vocabNS + "enrichedBy"), p);
                 }
                 if (i + 1 < t.stops.length) {
@@ -154,9 +150,8 @@ public class Main_IJGIS {
     private static void loadClusters(String dir, Map<String, POI> pois, Map<String, Cluster> clusters) {
         File file = new File(dir + "/pois-clusters.txt");
         try (Scanner scanner = new Scanner(new FileInputStream(file))) {
-            if (scanner.hasNext()) {
+            if (scanner.hasNext())
                 scanner.nextLine();
-            }
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
                 String[] fields = line.split(",");
@@ -174,19 +169,16 @@ public class Main_IJGIS {
                         break;
                 }
 
-                for (int i = 0; i < fields.length; i++) {
+                for (int i = 0; i < fields.length; i++)
                     fields[i] = fields[i].trim();
-                }
 
                 String[] subfields1 = fields[1].split(";");
                 List<POI> pois_ = new ArrayList<>();
-                for (String poiName : subfields1) {
-                    if (pois.containsKey(poiName)) {
+                for (String poiName : subfields1)
+                    if (pois.containsKey(poiName))
                         pois_.add(pois.get(poiName));
-                    } else {
+                    else
                         System.out.println(poiName);
-                    }
-                }
 
                 Cluster cluster = new Cluster("S" + discriminator + fields[0],
                         pois_.toArray(new POI[0]),
@@ -205,15 +197,13 @@ public class Main_IJGIS {
     private static void loadPhotos(String dir, Map<String, Photo> photos) {
         File file = new File(dir + "/photos.txt");
         try (Scanner scanner = new Scanner(new FileInputStream(file))) {
-            if (scanner.hasNext()) {
+            if (scanner.hasNext())
                 scanner.nextLine();
-            }
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
                 String[] fields = line.split(";");
-                for (int i = 0; i < fields.length; i++) {
+                for (int i = 0; i < fields.length; i++)
                     fields[i] = fields[i].trim();
-                }
                 String discriminator = "";
                 String location = file.getParentFile().getName();
                 switch (location) {
@@ -245,23 +235,19 @@ public class Main_IJGIS {
     private static void loadPOIs(String dir, Map<String, POI> pois) {
         File file = new File(dir + "/pois.txt");
         try (Scanner scanner = new Scanner(new FileInputStream(file))) {
-            if (scanner.hasNext()) {
+            if (scanner.hasNext())
                 scanner.nextLine();
-            }
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
                 String[] fields = line.split(";");
-                for (int i = 0; i < fields.length; i++) {
+                for (int i = 0; i < fields.length; i++)
                     fields[i] = fields[i].trim();
-                }
                 String discriminator = "";
                 String location = file.getParentFile().getName();
-                if (location.equals("rome")) {
+                if (location.equals("rome"))
                     discriminator = "R";
-                }
-                for (int i = 0; i < fields.length; i++) {
+                for (int i = 0; i < fields.length; i++)
                     fields[i] = fields[i].trim();
-                }
                 POI poi = new POI("P" + discriminator + fields[0],
                         fields[1],
                         Double.parseDouble(fields[2]),
