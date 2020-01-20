@@ -1,4 +1,4 @@
-# TripBuilderDataset
+# TripBuilderRDF
 
 TripBuilder is a semantic trajectory dataset constructed from user-generated content obtained from Flickr, combined with data from Wikipedia. The dataset contains user trajectories in 3 different Italian cities: Pisa, Rome, and Firenze.
 
