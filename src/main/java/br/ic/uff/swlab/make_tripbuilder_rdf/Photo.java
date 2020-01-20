@@ -1,4 +1,4 @@
-package br.ic.uff.swlab.maketrajetorydataset;
+package br.ic.uff.swlab.make_tripbuilder_rdf;
 
 import java.util.Date;
 
