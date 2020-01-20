@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>TripBuilder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="assets/css/tripbuilder.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="assets/ico/favicon.png">
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">TripBuilder</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container" >
+      <div class="row">
+          <!-- <div class="span3 bs-docs-sidebar">
+              <ul class="nav nav-list bs-docs-sidenav">
+                <li><a href="#dropdowns"><i class="icon-chevron-right"></i> Pois</a></li>
+                <li><a href="#buttonGroups"><i class="icon-chevron-right"></i> Photos</a></li>
+                <li><a href="#buttonDropdowns"><i class="icon-chevron-right"></i> Trajectories</a></li>
+              </ul>
+          </div> -->
+
+          <div class="span12">
+            <h2>Dataset Description</h2>
+            <p>There are datasets of three cities in Italy: (1) <strong>Pisa</strong>, (2) <strong>Florence</strong> and (3) <strong>Rome</strong>.</p>
+            <p>If you use these data, please cite the following paper:
+            <blockquote>
+				I. Brilhante, J.A. Macedo, F.M. Nardini, R. Perego, C. Renso,<br />
+				<strong>Where Shall We Go Today? Planning Touristic Tours with TripBuilder.</strong><br />
+			    Proc. ACM CIKM 2013.<br />
+            </blockquote>
+
+			<br />
+
+            <p>For each city, these are the available data.</p><hr/>
+            <div class="row-fluid">
+			  <address><h4>city-pois</h4>
+              <strong>Description:</strong> Points of interest of the city. These data were collected from Wikipedia.<br />
+              <strong>Atributtes:</strong>
+              <blockquote>
+                <ul>
+                  <li>id      : identifier of the POI</li>
+                  <li>name    : name of the POI</li>
+                  <li>latitude  : latitude of the spatial position of the POI</li>
+                  <li>longitude : longitude of the spatial position of the POI</li>
+                </ul>
+              </blockquote>
+            </address>
+            <hr/>
+            <address><h4>city-pois-clusters</h4>
+              <strong>Description:</strong> Points of interest of the city with the cluster identifier and addition information.<br />
+              <strong>Attributes:</strong>
+              <blockquote>
+                <ul>
+                    <li>clus      : identifier of the cluster</li>
+                    <li>pois      : list of pois that consist the cluster delimited by ";"</li>
+                    <li>latitude  : latitude of the cluster</li>
+                    <li>longitude : longitude of the cluster</li>
+                    <li>time      : time to visit the cluster in seconds</li>
+                    <li>categories: list of categories of the pois of the cluster</li>
+                </ul>
+              </blockquote>
+            </address>
+            <hr/>
+            <address><h4>city-photos</h4>
+              <strong>Description:</strong> Geo-referred photos in the city from Flickr.<br />
+              <strong>Attributes:</strong>
+              <blockquote>
+                <ul>
+                    <li>userid    : user's identifier</li>
+                    <li>photoid   : identifier of the photo</li>
+                    <li>datetaken : date the photo was taken</li>
+                    <li>dateupload  : date of upload of the photo on Flickr</li>
+                    <li>latitude  : latitude of the spatial position of the photo</li>
+                    <li>longitude : longitude of the spatial position of the photo</li>
+                </ul>
+              </blockquote>
+            </address>
+            <hr />
+            <address><h4>city-trajectories</h4>
+              <strong>Description:</strong> Trajectories created from the city-pois-clusters.txt and city-photos.txt. These data have already been preprocessed by: (i) assign a cluster of each photo; (ii) creating the users' history; and (iii) splitting the users' histories into trajectories.<br />
+              <strong>Attributes:</strong>
+                <blockquote>
+                  <ul>
+                      <li>column 1  : user' id;</li>
+                      <li>column 2  : trajectory</li>
+                      <li>delimiter  : "\t"</li>
+                  </ul>
+                </blockquote>
+              </li>
+              <strong>Trajectory:</strong> Contains a list of points (clus; number of photos; time of the first photo; time of the last photo). Each value is delimited by ";"
+            </address>
+            </div>
+          </div>
+        </div>
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="assets/js/jquery.js"></script>
+    <script src="assets/js/bootstrap-transition.js"></script>
+    <script src="assets/js/bootstrap-alert.js"></script>
+    <script src="assets/js/bootstrap-modal.js"></script>
+    <script src="assets/js/bootstrap-dropdown.js"></script>
+    <script src="assets/js/bootstrap-scrollspy.js"></script>
+    <script src="assets/js/bootstrap-tab.js"></script>
+    <script src="assets/js/bootstrap-tooltip.js"></script>
+    <script src="assets/js/bootstrap-popover.js"></script>
+    <script src="assets/js/bootstrap-button.js"></script>
+    <script src="assets/js/bootstrap-collapse.js"></script>
+    <script src="assets/js/bootstrap-carousel.js"></script>
+    <script src="assets/js/bootstrap-typeahead.js"></script>
+
+  </body>
+</html>
