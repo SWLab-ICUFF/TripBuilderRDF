@@ -1,4 +1,4 @@
-package br.ic.uff.swlab.make_tripbuilder_rdf;
+package make_tripbuilder_rdf;
 
 public class Trajectory {
 
@@ -6,8 +6,8 @@ public class Trajectory {
     public String location;
     public String userId;
     public Stop[] stops;
-    
-    private Stop begin,end;
+
+    private Stop begin, end;
 
     public Trajectory(String id, String location, String userId, Stop[] stops) {
         this.id = id;

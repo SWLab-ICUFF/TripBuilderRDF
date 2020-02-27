@@ -1,4 +1,4 @@
-package br.ic.uff.swlab.make_tripbuilder_rdf;
+package make_tripbuilder_rdf;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
