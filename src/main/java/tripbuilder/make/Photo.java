@@ -1,4 +1,4 @@
-package make_tripbuilder_rdf;
+package tripbuilder.make;
 
 import java.util.Date;
 

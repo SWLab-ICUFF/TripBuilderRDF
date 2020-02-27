@@ -1,4 +1,4 @@
-package make_tripbuilder_rdf;
+package tripbuilder.make;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
 import org.apache.jena.rdf.model.Model;
@@ -22,88 +21,65 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
-public class Main_IJGIS {
+public class Main {
 
     public static void main(String[] args) throws IOException {
-
-        String[] directories = {"./src/main/resources/TripBuilderRawData/florence",
-            "./src/main/resources/TripBuilderRawData/rome",
-            "./src/main/resources/TripBuilderRawData/pisa"
-        };
+        long counter = 0;
+        String[] directories = {"./src/main/resources/TripBuilderDataset/florence",
+            "./src/main/resources/TripBuilderDataset/pisa",
+            "./src/main/resources/TripBuilderDataset/rome"};
         Map<String, POI> pois = new HashMap<>();
         Map<String, Photo> photos = new HashMap<>();
         Map<String, Cluster> clusters = new HashMap<>();
         List<Trajectory> trajectories = new ArrayList<>();
 
         for (String dir : directories) {
-            long counter = 0;
             loadPOIs(dir, pois);
             loadPhotos(dir, photos);
             loadClusters(dir, pois, clusters);
             loadTrajectories(counter, dir, trajectories, clusters);
         }
-        Model model = ModelFactory.createDefaultModel();
-        triplificationProcess(model, trajectories);
-        try (GZIPOutputStream out = new GZIPOutputStream(
-                new BufferedOutputStream(
-                        new FileOutputStream("./src/main/resources/trajectory_ijgis.ttl.gz")))) {
-            RDFDataMgr.write(out, model, RDFFormat.TURTLE);
-        }
-    }
 
-    private static void triplificationProcess(Model model, List<Trajectory> trajectories) {
         String resourceNS = "http://localhost:8080/resource/";
         String vocabNS = "http://localhost:8080/vocab/";
-
+        Model model = ModelFactory.createDefaultModel();
         model.setNsPrefix("voc", vocabNS);
         model.setNsPrefix("rsc", resourceNS);
         model.setNsPrefix("rdf", RDF.uri);
         model.setNsPrefix("rdfs", RDFS.uri);
-
-        List<Resource> transportationResource = createTransportationResouces(model, resourceNS, vocabNS);
-
         for (Trajectory t : trajectories) {
+            model.createResource(resourceNS + t.userId,
+                    model.createResource(vocabNS + "Human", RDFS.Class)
+                            .addProperty(RDFS.subClassOf,
+                                    model.createResource(vocabNS + "MovingObject", RDFS.Class)))
+                    .addProperty(model.createProperty(vocabNS + "produces"),
+                            model.createResource(resourceNS + "R" + t.id, model.createResource(vocabNS + "RawTrajectory"))
+                                    .addProperty(model.createProperty(vocabNS + "isPartitionedInto"),
+                                            model.createResource(resourceNS + t.id, model.createResource(vocabNS + "SegmentedTrajectory", RDFS.Class))
+                                                    .addProperty(RDFS.comment, t.location)));
+
             Resource st = model.createResource(resourceNS + t.id);
-            st.addProperty(model.createProperty(vocabNS + "begins"), model.createResource(resourceNS + t.id + "_" + t.getBegin().cluster.id));
-            st.addProperty(model.createProperty(vocabNS + "ends"), model.createResource(resourceNS + t.id + "_" + t.getEnd().cluster.id));
-            st.addProperty(model.createProperty(vocabNS + "length"), model.createTypedLiteral(t.stops.length));
-
-            for (int i = 0; i < t.stops.length; i++) {
-                Stop s = t.stops[i];
-                Resource stop = model.createResource(resourceNS + t.id + "_" + s.cluster.id);
-                stop.addProperty(model.createProperty(vocabNS + "latitude"), model.createTypedLiteral(s.cluster.latitude));
-                stop.addProperty(model.createProperty(vocabNS + "longitude"), model.createTypedLiteral(s.cluster.longitude));
-
-                for (POI poi : s.cluster.pois) {
-                    Resource p = model.createResource(resourceNS + poi.id);
-                    p.addProperty(model.createProperty(vocabNS + "latitude"), model.createTypedLiteral(poi.latitude));
-                    p.addProperty(RDFS.label, poi.name);
-                    p.addProperty(model.createProperty(vocabNS + "longitude"), model.createTypedLiteral(poi.longitude));
-                    p.addProperty(model.createProperty(vocabNS + "locatedIn"), t.location);
-
-                    for (String category : s.cluster.categories)
-                        p.addProperty(model.createProperty(vocabNS + "category"), category);
-                    model.add(p, RDF.type, model.createResource(vocabNS + "POI", RDFS.Class));
-
-                    stop.addProperty(model.createProperty(vocabNS + "enrichedBy"), p);
-                }
-                if (i + 1 < t.stops.length) {
-                    Stop next = t.stops[i + 1];
-                    Resource to = model.createResource(resourceNS + t.id + "_" + next.cluster.id);
-                    stop.addProperty(model.createProperty(vocabNS + "next"), to);
-
-                    Resource move = model.createResource(resourceNS + t.id + "_" + s.cluster.id + "_" + next.cluster.id);
-                    move.addProperty(model.createProperty(vocabNS + "from"), stop);
-                    move.addProperty(model.createProperty(vocabNS + "to"), to);
-                    move.addProperty(model.createProperty(vocabNS + "segment_number"), model.createTypedLiteral(i + 1));
-                    move.addProperty(model.createProperty(vocabNS + "enrichedBy"), getRandomlyTransportation(transportationResource));
-                    model.add(move, RDF.type, model.createResource(vocabNS + "Move", RDFS.Class));
-                    st.addProperty(model.createProperty(vocabNS + "has"), move);
-                }
-                st.addProperty(model.createProperty(vocabNS + "has"), stop);
-                model.add(stop, RDF.type, model.createResource(vocabNS + "Stop", RDFS.Class));
+            for (Stop s : t.stops) {
+                st.addProperty(model.createProperty(vocabNS + "isComposedOf"),
+                        model.createResource(resourceNS + s.cluster.id,
+                                model.createResource(vocabNS + "Stop", RDFS.Class)
+                                        .addProperty(RDFS.subClassOf, model.createResource(vocabNS + "Segment", RDFS.Class)))
+                                .addProperty(model.createProperty(vocabNS + "latitude"), model.createTypedLiteral(s.cluster.latitude))
+                                .addProperty(model.createProperty(vocabNS + "longitude"), model.createTypedLiteral(s.cluster.longitude)));
+                Resource stop = model.createResource(resourceNS + s.cluster.id);
+                for (POI poi : s.cluster.pois)
+                    stop.addProperty(model.createProperty(vocabNS + "near"),
+                            model.createResource(resourceNS + poi.id, model.createResource(vocabNS + "POI", RDFS.Class))
+                                    .addProperty(model.createProperty(vocabNS + "latitude"), model.createTypedLiteral(poi.latitude))
+                                    .addProperty(model.createProperty(vocabNS + "longitude"), model.createTypedLiteral(poi.longitude))
+                                    .addProperty(RDFS.label, poi.name));
             }
-            model.add(st, RDF.type, model.createResource(vocabNS + "Trajectory", RDFS.Class));
+        }
+
+        try (GZIPOutputStream out = new GZIPOutputStream(
+                new BufferedOutputStream(
+                        new FileOutputStream("./src/main/resources/trajectory.ttl.gz")))) {
+            RDFDataMgr.write(out, model, RDFFormat.TURTLE);
         }
     }
 
@@ -137,13 +113,10 @@ public class Main_IJGIS {
                             Long.parseLong(subfields[3]));
                     stops.add(stop);
                 }
-                Trajectory current = new Trajectory("T" + discriminator + ++counter, location, userId, stops.toArray(new Stop[0]));
-                current.setBegin(stops.get(0));
-                current.setEnd(stops.get(stops.size() - 1));
-                trajectories.add(current);
+                trajectories.add(new Trajectory("T" + discriminator + counter++, location, userId, stops.toArray(new Stop[0])));
             }
         } catch (Throwable ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -190,7 +163,7 @@ public class Main_IJGIS {
             }
 
         } catch (Throwable ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -228,7 +201,7 @@ public class Main_IJGIS {
             }
 
         } catch (Throwable ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -256,26 +229,7 @@ public class Main_IJGIS {
             }
 
         } catch (Throwable ex) {
-            System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
-
-    private static List<Resource> createTransportationResouces(Model model, String resourceNS, String vocabNS) {
-        String[] transportationWays = new String[]{"walking", "bus", "taxi", "subway"};
-        List<Resource> transportation = new ArrayList<>();
-        for (String s : transportationWays) {
-            Resource r = model.createResource(resourceNS + s);
-            r.addProperty(RDFS.label, s);
-            model.add(r, RDF.type, model.createResource(vocabNS + "Transportation", RDFS.Class));
-            transportation.add(r);
-        }
-        return transportation;
-    }
-
-    private static Resource getRandomlyTransportation(List<Resource> transportation) {
-        Random r = new Random();
-        int randomIndex = r.nextInt(transportation.size());
-        return transportation.get(randomIndex);
-    }
-
 }
