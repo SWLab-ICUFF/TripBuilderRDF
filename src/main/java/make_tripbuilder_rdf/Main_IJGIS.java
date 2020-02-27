@@ -1,4 +1,4 @@
-package br.ic.uff.swlab.make_tripbuilder_rdf;
+package make_tripbuilder_rdf;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -95,7 +96,7 @@ public class Main_IJGIS {
                     Resource move = model.createResource(resourceNS + t.id + "_" + s.cluster.id + "_" + next.cluster.id);
                     move.addProperty(model.createProperty(vocabNS + "from"), stop);
                     move.addProperty(model.createProperty(vocabNS + "to"), to);
-                    move.addProperty(model.createProperty(vocabNS + "segment_number"), model.createTypedLiteral(i + 1));
+                    move.addProperty(model.createProperty(vocabNS + "move_number"), model.createTypedLiteral(i + 1));
                     move.addProperty(model.createProperty(vocabNS + "enrichedBy"), getRandomlyTransportation(transportationResource));
                     model.add(move, RDF.type, model.createResource(vocabNS + "Move", RDFS.Class));
                     st.addProperty(model.createProperty(vocabNS + "has"), move);
@@ -261,11 +262,11 @@ public class Main_IJGIS {
     }
 
     private static List<Resource> createTransportationResouces(Model model, String resourceNS, String vocabNS) {
-        String[] transportationWays = new String[]{"walking", "bus", "taxi", "subway"};
+        String[] transportationWays = new String[]{"Walk", "Bus", "Taxi", "Subway"};
         List<Resource> transportation = new ArrayList<>();
         for (String s : transportationWays) {
             Resource r = model.createResource(resourceNS + s);
-            r.addProperty(RDFS.label, s);
+            r.addProperty(RDFS.label, s.toLowerCase());
             model.add(r, RDF.type, model.createResource(vocabNS + "Transportation", RDFS.Class));
             transportation.add(r);
         }
